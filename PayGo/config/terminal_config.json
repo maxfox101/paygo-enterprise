@@ -1,0 +1,132 @@
+{
+  "terminal": {
+    "id": "TERMINAL_001",
+    "location": "Офис PayGo",
+    "version": "1.0.0",
+    "hardware": {
+      "platform": "raspberry_pi_4",
+      "display": {
+        "resolution": "1920x1080",
+        "touchscreen": true
+      },
+      "peripherals": {
+        "nfc_reader": {
+          "enabled": true,
+          "device": "/dev/ttyUSB0"
+        },
+        "camera": {
+          "enabled": true,
+          "device": "/dev/video0",
+          "resolution": "1280x720"
+        },
+        "fingerprint_scanner": {
+          "enabled": true,
+          "device": "/dev/ttyUSB1"
+        },
+        "fiscal_registrator": {
+          "enabled": true,
+          "model": "АТОЛ 91Ф",
+          "connection": "USB"
+        }
+      }
+    }
+  },
+  "payment": {
+    "supported_methods": [
+      "nfc_card",
+      "nfc_phone", 
+      "qr_code",
+      "biometry_face",
+      "biometry_fingerprint"
+    ],
+    "banks": {
+      "acquiring": {
+        "vtb": {
+          "enabled": true,
+          "merchant_id": "VTB_MERCHANT_ID",
+          "api_endpoint": "https://api.vtb.ru/acquiring"
+        },
+        "alfa": {
+          "enabled": true,
+          "merchant_id": "ALFA_MERCHANT_ID", 
+          "api_endpoint": "https://api.alfabank.ru/acquiring"
+        },
+        "center_invest": {
+          "enabled": true,
+          "merchant_id": "CI_MERCHANT_ID",
+          "api_endpoint": "https://api.centrinvest.ru/acquiring"
+        }
+      },
+      "sbp": {
+        "enabled": true,
+        "merchant_id": "SBP_MERCHANT_ID",
+        "api_endpoint": "https://api.sbp.ru"
+      }
+    },
+    "limits": {
+      "min_amount": 1.00,
+      "max_amount": 100000.00,
+      "daily_limit": 1000000.00
+    }
+  },
+  "security": {
+    "encryption": {
+      "algorithm": "AES-256-GCM",
+      "key_rotation_days": 30
+    },
+    "biometry": {
+      "face_recognition": {
+        "confidence_threshold": 0.85,
+        "liveness_detection": true
+      },
+      "fingerprint": {
+        "quality_threshold": 60,
+        "matching_threshold": 40
+      }
+    },
+    "session": {
+      "timeout_seconds": 300,
+      "max_attempts": 3
+    }
+  },
+  "network": {
+    "api_server": {
+      "url": "https://api.paygo.ru",
+      "timeout_seconds": 30,
+      "retry_attempts": 3
+    },
+    "offline_mode": {
+      "enabled": true,
+      "max_transactions": 1000,
+      "sync_interval_minutes": 5
+    },
+    "monitoring": {
+      "heartbeat_interval_seconds": 60,
+      "log_level": "INFO"
+    }
+  },
+  "ui": {
+    "language": "ru",
+    "theme": "light",
+    "timeout": {
+      "idle_seconds": 60,
+      "transaction_seconds": 180
+    },
+    "sounds": {
+      "enabled": true,
+      "volume": 0.7
+    }
+  },
+  "database": {
+    "local": {
+      "path": "/var/lib/paygo/terminal.db",
+      "backup_interval_hours": 6
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "/var/log/paygo/terminal.log",
+    "max_size_mb": 100,
+    "backup_count": 5
+  }
+} 

@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # База данных PostgreSQL
+  database:
+    image: postgres:15
+    container_name: paygo_database
+    environment:
+      POSTGRES_DB: paygo
+      POSTGRES_USER: paygo_user
+      POSTGRES_PASSWORD: paygo_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./web-service/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - paygo_network
+
+  # Redis для кэширования
+  redis:
+    image: redis:7-alpine
+    container_name: paygo_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - paygo_network
+
+  # Backend API
+  backend:
+    build:
+      context: ./web-service/backend
+      dockerfile: Dockerfile
+    container_name: paygo_backend
+    environment:
+      - DATABASE_URL=postgresql://paygo_user:paygo_password@database:5432/paygo
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=your-secret-key-change-in-production
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - database
+      - redis
+    volumes:
+      - ./web-service/backend:/app
+    networks:
+      - paygo_network
+    restart: unless-stopped
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./web-service/frontend
+      dockerfile: Dockerfile
+    container_name: paygo_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - paygo_network
+    restart: unless-stopped
+
+  # Nginx reverse proxy (опционально для продакшена)
+  nginx:
+    image: nginx:alpine
+    container_name: paygo_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/nginx.conf
+      - ./config/ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - paygo_network
+    restart: unless-stopped
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  paygo_network:
+    driver: bridge 

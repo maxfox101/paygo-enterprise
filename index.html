@@ -1,0 +1,2444 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayGo Enterprise - Корпоративная платформа управления платежами</title>
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), location=(), payment=()">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous">
+    <style>
+        :root {
+            --primary-bg: #1a1d23;
+            --secondary-bg: #111827;
+            --tertiary-bg: #1f2937;
+            --border-color: #374151;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --accent-color: #f97316;
+            --accent-hover: #ea580c;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+            --warning-color: #fbbf24;
+            --info-color: #3b82f6;
+        }
+
+        [data-theme="light"] {
+            --primary-bg: #ffffff;
+            --secondary-bg: #f9fafb;
+            --tertiary-bg: #f3f4f6;
+            --border-color: #e5e7eb;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.5;
+            font-weight: 400;
+            transition: all 0.3s ease;
+        }
+
+        /* Landing Page */
+        .landing {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 50%, var(--tertiary-bg) 100%);
+            position: relative;
+        }
+
+        .landing-header {
+            padding: 25px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--accent-color);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            font-size: 24px;
+        }
+
+        .auth-btn {
+            background: var(--accent-color);
+            color: white;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 14px;
+        }
+
+        .auth-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .hero-section {
+            padding: 120px 50px 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+            line-height: 1.1;
+            letter-spacing: -1px;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            margin-bottom: 40px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            background: var(--accent-color);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            margin-right: 16px;
+        }
+
+        .cta-button:hover {
+            background: var(--accent-hover);
+        }
+
+        .cta-button.secondary {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .cta-button.secondary:hover {
+            border-color: var(--text-muted);
+            color: var(--text-primary);
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+            background: var(--primary-bg);
+        }
+
+        .dashboard.active {
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--secondary-bg);
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            padding: 0;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background: var(--secondary-bg);
+            z-index: 10;
+        }
+
+        .sidebar-logo .logo {
+            font-size: 20px;
+        }
+
+        .nav-section {
+            padding: 24px 0;
+        }
+
+        .nav-section-title {
+            padding: 0 24px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: var(--tertiary-bg);
+            color: var(--accent-color);
+            border-right: 2px solid var(--accent-color);
+        }
+
+        .nav-item i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .sidebar-footer {
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 24px;
+            border-top: 1px solid var(--border-color);
+            background: var(--secondary-bg);
+            z-index: 10;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: var(--tertiary-bg);
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 12px;
+        }
+
+        .user-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .user-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .logout-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            background: var(--primary-bg);
+        }
+
+        .content-header {
+            background: var(--secondary-bg);
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .breadcrumb span {
+            margin: 0 8px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .content-body {
+            padding: 32px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            transition: border-color 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            border-color: var(--text-muted);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-color);
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--accent-color);
+            background: rgba(249, 115, 22, 0.1);
+            margin-bottom: 16px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+            font-weight: 600;
+            margin-top: 8px;
+            display: inline-block;
+        }
+
+        .stat-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+        }
+
+        /* Content Sections */
+        .content-section {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 8px;
+            color: var(--accent-color);
+        }
+
+        .section-body {
+            padding: 24px;
+        }
+
+        .action-btn {
+            background: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 14px;
+        }
+
+        .action-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .action-btn.secondary {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .action-btn.secondary:hover {
+            border-color: var(--text-muted);
+            color: var(--text-primary);
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            padding: 12px;
+            text-align: left;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table td {
+            padding: 16px 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .data-table tr:hover {
+            background: var(--tertiary-bg);
+        }
+
+        .status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status.online {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+        }
+
+        .status.offline {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+        }
+
+        .status.completed {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+        }
+
+        .status.pending {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--warning-color);
+        }
+
+        .status.submitted {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info-color);
+        }
+
+        .status.active {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+        }
+
+        .status.inactive {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-muted);
+        }
+
+        /* Settings Grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        .setting-card {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .setting-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .setting-header i {
+            width: 40px;
+            height: 40px;
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--accent-color);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+
+        .setting-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .setting-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        /* Form Controls */
+        .form-control {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--tertiary-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--border-color);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: var(--accent-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Biometric Cards */
+        .biometric-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .biometric-card {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .biometric-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .biometric-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 16px;
+        }
+
+        .biometric-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .biometric-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        /* Auth Modal */
+        .auth-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-modal.active {
+            display: flex;
+        }
+
+        .auth-form {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            padding: 40px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+
+        .auth-form h2 {
+            margin-bottom: 24px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--tertiary-bg);
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .auth-submit {
+            width: 100%;
+            background: var(--accent-color);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .auth-submit:hover {
+            background: var(--accent-hover);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--text-secondary);
+        }
+
+        /* Page Content */
+        .page-content {
+            display: none;
+        }
+
+        .page-content.active {
+            display: block;
+        }
+
+        /* Tax Cards */
+        .tax-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .tax-card {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .tax-card h3 {
+            color: var(--accent-color);
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .tax-amount {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .tax-period {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .tax-deadline {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            background: var(--tertiary-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        /* Charts placeholder */
+        .chart-container {
+            height: 300px;
+            background: var(--tertiary-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        /* Security Badge */
+        .security-badge {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--success-color);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 25px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1000;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .security-badge:hover {
+            transform: scale(1.1);
+            background: var(--accent-color);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Security Panel */
+        .security-panel {
+            position: fixed;
+            bottom: 80px;
+            right: 24px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            width: 350px;
+            z-index: 2000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .security-panel.show {
+            transform: translateX(0);
+        }
+
+        .security-panel h3 {
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .security-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .security-item:last-child {
+            border-bottom: none;
+        }
+
+        .security-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .security-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-color);
+        }
+
+        .security-indicator.warning {
+            background: var(--warning-color);
+        }
+
+        .security-indicator.error {
+            background: var(--error-color);
+        }
+
+        /* Rate Limit Warning */
+        .rate-limit-warning {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--error-color);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 8px;
+            z-index: 3000;
+            display: none;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .rate-limit-warning.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-toggle i {
+            font-size: 18px;
+            color: var(--accent-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .content-body {
+                padding: 24px 16px;
+            }
+
+            .hero-title {
+                font-size: 36px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 16px 20px;
+            max-width: 300px;
+            z-index: 2000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .notification.warning {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .notification.info {
+            border-left: 4px solid var(--info-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon" id="themeIcon"></i>
+    </div>
+
+    <!-- Security Badge -->
+    <div class="security-badge" onclick="toggleSecurityPanel()">
+        <i class="fas fa-shield-check"></i> Защищено SSL
+    </div>
+
+    <!-- Security Panel -->
+    <div class="security-panel" id="securityPanel">
+        <h3><i class="fas fa-shield-alt"></i> Состояние безопасности</h3>
+        <div class="security-item">
+            <span>SSL/TLS Шифрование</span>
+            <div class="security-status">
+                <div class="security-indicator"></div>
+                <span>Активно</span>
+            </div>
+        </div>
+        <div class="security-item">
+            <span>Двухфакторная аутентификация</span>
+            <div class="security-status">
+                <div class="security-indicator"></div>
+                <span>Включена</span>
+            </div>
+        </div>
+        <div class="security-item">
+            <span>Биометрическая защита</span>
+            <div class="security-status">
+                <div class="security-indicator"></div>
+                <span>Настроена</span>
+            </div>
+        </div>
+        <div class="security-item">
+            <span>Защита от XSS</span>
+            <div class="security-status">
+                <div class="security-indicator"></div>
+                <span>Активна</span>
+            </div>
+        </div>
+        <div class="security-item">
+            <span>CSRF Токены</span>
+            <div class="security-status">
+                <div class="security-indicator"></div>
+                <span>Проверяются</span>
+            </div>
+        </div>
+        <div class="security-item">
+            <span>Rate Limiting</span>
+            <div class="security-status">
+                <div class="security-indicator warning"></div>
+                <span>Мониторинг</span>
+            </div>
+        </div>
+        <div class="security-item">
+            <span>Аудит безопасности</span>
+            <div class="security-status">
+                <div class="security-indicator"></div>
+                <span id="auditTime">Сегодня 20:15</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rate Limit Warning -->
+    <div class="rate-limit-warning" id="rateLimitWarning">
+        <h3><i class="fas fa-exclamation-triangle"></i> Превышен лимит запросов</h3>
+        <p>Подождите 30 секунд перед повторной попыткой</p>
+        <div style="margin-top: 10px;">
+            <span id="cooldownTimer">30</span> секунд
+        </div>
+    </div>
+
+    <!-- Landing Page -->
+    <div class="landing" id="landing">
+        <div class="landing-header">
+            <a href="#" class="logo">
+                <i class="fas fa-building"></i>
+                PayGo Enterprise
+            </a>
+            <button class="auth-btn" onclick="openAuthModal()">
+                Вход в систему
+            </button>
+        </div>
+        
+        <div class="hero-section">
+            <h1 class="hero-title">Корпоративное управление платежами</h1>
+            <p class="hero-subtitle">
+                Профессиональная платформа для управления сетью платежных терминалов, 
+                обработки транзакций и ведения налоговой отчетности в соответствии с требованиями ФНС России
+            </p>
+            <button class="cta-button" onclick="openAuthModal()">
+                Начать работу
+            </button>
+            <button class="cta-button secondary">
+                Техническая документация
+            </button>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="logo">
+                    <i class="fas fa-building"></i>
+                    PayGo Enterprise
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Основное</div>
+                <div class="nav-item active" onclick="showPage('overview')">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Обзор</span>
+                </div>
+                
+                <div class="nav-item" onclick="showPage('terminals')">
+                    <i class="fas fa-desktop"></i>
+                    <span>Терминалы</span>
+                </div>
+                
+                <div class="nav-item" onclick="showPage('transactions')">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Транзакции</span>
+                </div>
+                
+                <div class="nav-item" onclick="showPage('analytics')">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Аналитика</span>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Финансы и отчетность</div>
+                <div class="nav-item" onclick="showPage('payments')">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Платежи</span>
+                </div>
+                
+                <div class="nav-item" onclick="showPage('taxes')">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Налоговая отчетность</span>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Безопасность</div>
+                <div class="nav-item" onclick="showPage('biometrics')">
+                    <i class="fas fa-fingerprint"></i>
+                    <span>Биометрия</span>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Администрирование</div>
+                <div class="nav-item" onclick="showPage('settings')">
+                    <i class="fas fa-cog"></i>
+                    <span>Настройки</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" id="userAvatar">П</div>
+                    <div class="user-info">
+                        <h4 id="userName">Пользователь</h4>
+                        <p id="userPhone">+7 (___) ___-__-__</p>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Выйти из системы
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Overview Page -->
+            <div class="page-content active" id="overview-page">
+                <div class="content-header">
+                    <div class="breadcrumb">
+                        <span>PayGo Enterprise</span>
+                        <span>›</span>
+                        <span>Обзор</span>
+                    </div>
+                    <h1 class="page-title">Операционная сводка</h1>
+                    <p class="page-subtitle">Ключевые показатели эффективности за текущий период</p>
+                </div>
+
+                <div class="content-body">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-desktop"></i>
+                            </div>
+                            <div class="stat-value" id="terminalCount">47</div>
+                            <div class="stat-label">Активных терминалов</div>
+                            <div class="stat-change">+12% за месяц</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                            <div class="stat-value" id="transactionCount">8,247</div>
+                            <div class="stat-label">Транзакций сегодня</div>
+                            <div class="stat-change">+18% к вчера</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-ruble-sign"></i>
+                            </div>
+                            <div class="stat-value" id="revenue">₽18.7М</div>
+                            <div class="stat-label">Оборот за месяц</div>
+                            <div class="stat-change">+23% к прошлому</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-shield-check"></i>
+                            </div>
+                            <div class="stat-value">99.94%</div>
+                            <div class="stat-label">Доступность системы</div>
+                            <div class="stat-change">SLA выполнен</div>
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-chart-area"></i>
+                                Операционная аналитика
+                            </h2>
+                            <div>
+                                <button class="action-btn secondary">Период</button>
+                                <button class="action-btn">Экспорт</button>
+                            </div>
+                        </div>
+                        <div class="section-body">
+                            <div class="chart-container">
+                                <i class="fas fa-chart-line" style="margin-right: 8px;"></i>
+                                Загрузка интерактивных графиков...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminals Page -->
+            <div class="page-content" id="terminals-page">
+                <div class="content-header">
+                    <div class="breadcrumb">
+                        <span>PayGo Enterprise</span>
+                        <span>›</span>
+                        <span>Терминалы</span>
+                    </div>
+                    <h1 class="page-title">Управление терминалами</h1>
+                    <p class="page-subtitle">Мониторинг состояния и конфигурация устройств</p>
+                </div>
+
+                <div class="content-body">
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-list"></i>
+                                Реестр терминалов
+                            </h2>
+                            <button class="action-btn" onclick="addTerminal()">
+                                <i class="fas fa-plus"></i> Добавить терминал
+                            </button>
+                        </div>
+                        <div class="section-body">
+                            <div class="filters">
+                                <select class="filter-select">
+                                    <option>Все статусы</option>
+                                    <option>Online</option>
+                                    <option>Offline</option>
+                                </select>
+                                <select class="filter-select">
+                                    <option>Все локации</option>
+                                    <option>Москва</option>
+                                    <option>Ростов-на-Дону</option>
+                                </select>
+                            </div>
+
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID терминала</th>
+                                        <th>Модель</th>
+                                        <th>Локация</th>
+                                        <th>Статус</th>
+                                        <th>Последняя активность</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>PG-MSK-001</td>
+                                        <td>PayGo Terminal Pro</td>
+                                        <td>Москва, ТЦ «Авиапарк»</td>
+                                        <td><span class="status online">Online</span></td>
+                                        <td>3 мин назад</td>
+                                        <td>
+                                            <button class="action-btn secondary" onclick="manageTerminal('PG-MSK-001')">Управление</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>PG-ROV-002</td>
+                                        <td>PayGo Terminal Standard</td>
+                                        <td>Ростов-на-Дону, Аэропорт Платов</td>
+                                        <td><span class="status online">Online</span></td>
+                                        <td>7 мин назад</td>
+                                        <td>
+                                            <button class="action-btn secondary" onclick="manageTerminal('PG-ROV-002')">Управление</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>PG-MSK-003</td>
+                                        <td>PayGo Terminal Compact</td>
+                                        <td>Москва, ВТБ-Арена</td>
+                                        <td><span class="status offline">Offline</span></td>
+                                        <td>4 часа назад</td>
+                                        <td>
+                                            <button class="action-btn secondary" onclick="manageTerminal('PG-MSK-003')">Диагностика</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Page -->
+            <div class="page-content" id="transactions-page">
+                <div class="content-header">
+                    <div class="breadcrumb">
+                        <span>PayGo Enterprise</span>
+                        <span>›</span>
+                        <span>Транзакции</span>
+                    </div>
+                    <h1 class="page-title">Журнал транзакций</h1>
+                    <p class="page-subtitle">История и детализация платежных операций</p>
+                </div>
+
+                <div class="content-body">
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-receipt"></i>
+                                Операции за сегодня
+                            </h2>
+                            <button class="action-btn" onclick="exportTransactions()">
+                                <i class="fas fa-file-export"></i> Экспорт в Excel
+                            </button>
+                        </div>
+                        <div class="section-body">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID операции</th>
+                                        <th>Терминал</th>
+                                        <th>Сумма</th>
+                                        <th>Способ оплаты</th>
+                                        <th>Статус</th>
+                                        <th>Время</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>TXN-240719-001</td>
+                                        <td>PG-MSK-001</td>
+                                        <td>₽2,750</td>
+                                        <td><i class="fas fa-wifi"></i> NFC карта</td>
+                                        <td><span class="status completed">Завершена</span></td>
+                                        <td>20:15:43</td>
+                                    </tr>
+                                    <tr>
+                                        <td>TXN-240719-002</td>
+                                        <td>PG-ROV-002</td>
+                                        <td>₽1,450</td>
+                                        <td><i class="fas fa-qrcode"></i> QR-код СБП</td>
+                                        <td><span class="status completed">Завершена</span></td>
+                                        <td>20:12:18</td>
+                                    </tr>
+                                    <tr>
+                                        <td>TXN-240719-003</td>
+                                        <td>PG-MSK-001</td>
+                                        <td>₽5,200</td>
+                                        <td><i class="fas fa-fingerprint"></i> Биометрия</td>
+                                        <td><span class="status pending">Обработка</span></td>
+                                        <td>20:08:27</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Page -->
+            <div class="page-content" id="analytics-page">
+                <div class="content-header">
+                    <div class="breadcrumb">
+                        <span>PayGo Enterprise</span>
+                        <span>›</span>
+                        <span>Аналитика</span>
+                    </div>
+                    <h1 class="page-title">Бизнес-аналитика</h1>
+                    <p class="page-subtitle">Детальная статистика и прогнозное моделирование</p>
+                </div>
+
+                <div class="content-body">
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-chart-bar"></i>
+                                Отчеты и аналитика
+                            </h2>
+                        </div>
+                        <div class="section-body">
+                            <div class="chart-container">
+                                <i class="fas fa-analytics" style="margin-right: 8px;"></i>
+                                Модуль бизнес-аналитики в разработке
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payments Page -->
+            <div class="page-content" id="payments-page">
+                <div class="content-header">
+                    <div class="breadcrumb">
+                        <span>PayGo Enterprise</span>
+                        <span>›</span>
+                        <span>Платежи</span>
+                    </div>
+                    <h1 class="page-title">Управление платежами</h1>
+                    <p class="page-subtitle">Обработка и маршрутизация платежных операций</p>
+                </div>
+
+                <div class="content-body">
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-credit-card"></i>
+                                Платежные операции
+                            </h2>
+                        </div>
+                        <div class="section-body">
+                            <div class="chart-container">
+                                <i class="fas fa-credit-card" style="margin-right: 8px;"></i>
+                                Модуль управления платежами в разработке
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tax Page -->
+            <div class="page-content" id="taxes-page">
+                <div class="content-header">
+                    <div class="breadcrumb">
+                        <span>PayGo Enterprise</span>
+                        <span>›</span>
+                        <span>Налоговая отчетность</span>
+                    </div>
+                    <h1 class="page-title">Налоговая отчетность</h1>
+                    <p class="page-subtitle">Формирование и подача отчетности в соответствии с требованиями ФНС РФ</p>
+                </div>
+
+                <div class="content-body">
+                    <div class="tax-cards">
+                        <div class="tax-card">
+                            <h3>НДС к доплате</h3>
+                            <div class="tax-amount">₽847,520</div>
+                            <div class="tax-period">III квартал 2024</div>
+                            <div class="tax-deadline">До 25 октября</div>
+                        </div>
+                        
+                        <div class="tax-card">
+                            <h3>Налог на прибыль</h3>
+                            <div class="tax-amount">₽1,245,800</div>
+                            <div class="tax-period">9 месяцев 2024</div>
+                            <div class="tax-deadline">До 28 октября</div>
+                        </div>
+                        
+                        <div class="tax-card">
+                            <h3>НДФЛ удержанный</h3>
+                            <div class="tax-amount">₹156,200</div>
+                            <div class="tax-period">Сентябрь 2024</div>
+                            <div class="tax-deadline">До 15 октября</div>
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-file-invoice"></i>
+                                Реестр отчетов
+                            </h2>
+                            <div>
+                                <button class="action-btn secondary">Сформировать отчет</button>
+                                <button class="action-btn">Отправить в ФНС</button>
+                            </div>
+                        </div>
+                        <div class="section-body">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Тип отчета</th>
+                                        <th>Период</th>
+                                        <th>Статус</th>
+                                        <th>Дата подачи</th>
+                                        <th>Сумма к доплате</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Декларация по НДС</td>
+                                        <td>III кв. 2024</td>
+                                        <td><span class="status pending">Подготовлена</span></td>
+                                        <td>—</td>
+                                        <td>₽847,520</td>
+                                        <td>
+                                            <button class="action-btn secondary">Отправить</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Декларация по налогу на прибыль</td>
+                                        <td>9 мес. 2024</td>
+                                        <td><span class="status submitted">Подана</span></td>
+                                        <td>15.10.2024</td>
+                                        <td>₽1,245,800</td>
+                                        <td>
+                                            <button class="action-btn secondary">Просмотр</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Справка 2-НДФЛ</td>
+                                        <td>Сентябрь 2024</td>
+                                        <td><span class="status completed">Принята</span></td>
+                                        <td>10.10.2024</td>
+                                        <td>₽156,200</td>
+                                        <td>
+                                            <button class="action-btn secondary">Квитанция</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-calculator"></i>
+                                Налоговая нагрузка
+                            </h2>
+                        </div>
+                        <div class="section-body">
+                            <div class="chart-container">
+                                <i class="fas fa-chart-pie" style="margin-right: 8px;"></i>
+                                График налоговой нагрузки по периодам
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Biometrics Page -->
+            <div class="page-content" id="biometrics-page">
+                <div class="content-header">
+                    <div class="breadcrumb">
+                        <span>PayGo Enterprise</span>
+                        <span>›</span>
+                        <span>Биометрия</span>
+                    </div>
+                    <h1 class="page-title">Управление биометрией</h1>
+                    <p class="page-subtitle">Настройка биометрической аутентификации и контроля доступа</p>
+                </div>
+
+                <div class="content-body">
+                    <div class="biometric-cards">
+                        <div class="biometric-card" onclick="setupBiometric('fingerprint')">
+                            <div class="biometric-icon">
+                                <i class="fas fa-fingerprint"></i>
+                            </div>
+                            <h3>Отпечатки пальцев</h3>
+                            <p>Настройка сканера отпечатков для быстрой аутентификации пользователей</p>
+                            <div class="status active">3 активных отпечатка</div>
+                        </div>
+                        
+                        <div class="biometric-card" onclick="setupBiometric('face')">
+                            <div class="biometric-icon">
+                                <i class="fas fa-face-smile"></i>
+                            </div>
+                            <h3>Распознавание лиц</h3>
+                            <p>Система распознавания лиц для бесконтактной авторизации</p>
+                            <div class="status active">2 лица в базе</div>
+                        </div>
+                        
+                        <div class="biometric-card" onclick="setupBiometric('iris')">
+                            <div class="biometric-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <h3>Сканирование радужки</h3>
+                            <p>Высокоточная идентификация по радужной оболочке глаза</p>
+                            <div class="status inactive">Не настроено</div>
+                        </div>
+                        
+                        <div class="biometric-card" onclick="setupBiometric('voice')">
+                            <div class="biometric-icon">
+                                <i class="fas fa-microphone"></i>
+                            </div>
+                            <h3>Голосовая аутентификация</h3>
+                            <p>Распознавание пользователей по уникальным характеристикам голоса</p>
+                            <div class="status inactive">Не настроено</div>
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-shield-alt"></i>
+                                История биометрических аутентификаций
+                            </h2>
+                            <button class="action-btn" onclick="exportBiometricLogs()">
+                                <i class="fas fa-download"></i> Экспорт журнала
+                            </button>
+                        </div>
+                        <div class="section-body">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Время</th>
+                                        <th>Пользователь</th>
+                                        <th>Тип биометрии</th>
+                                        <th>Терминал</th>
+                                        <th>Статус</th>
+                                        <th>Точность</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>20:15:43</td>
+                                        <td>Иван Петров</td>
+                                        <td><i class="fas fa-fingerprint"></i> Отпечаток</td>
+                                        <td>PG-MSK-001</td>
+                                        <td><span class="status completed">Успешно</span></td>
+                                        <td>99.7%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>20:08:15</td>
+                                        <td>Анна Смирнова</td>
+                                        <td><i class="fas fa-face-smile"></i> Лицо</td>
+                                        <td>PG-ROV-002</td>
+                                        <td><span class="status completed">Успешно</span></td>
+                                        <td>98.2%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>19:52:31</td>
+                                        <td>Неизвестный</td>
+                                        <td><i class="fas fa-fingerprint"></i> Отпечаток</td>
+                                        <td>PG-MSK-003</td>
+                                        <td><span class="status offline">Отклонено</span></td>
+                                        <td>43.1%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div class="page-content" id="settings-page">
+                <div class="content-header">
+                    <div class="breadcrumb">
+                        <span>PayGo Enterprise</span>
+                        <span>›</span>
+                        <span>Настройки</span>
+                    </div>
+                    <h1 class="page-title">Системные настройки</h1>
+                    <p class="page-subtitle">Конфигурация платформы и пользовательские настройки</p>
+                </div>
+
+                <div class="content-body">
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <div class="setting-header">
+                                <i class="fas fa-palette"></i>
+                                <h3>Оформление</h3>
+                            </div>
+                            <div class="setting-description">
+                                Настройка темы интерфейса и цветовой схемы
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label">Тема интерфейса</label>
+                                <select class="form-select" onchange="changeTheme(this.value)">
+                                    <option value="dark">Темная тема</option>
+                                    <option value="light">Светлая тема</option>
+                                    <option value="auto">Системная тема</option>
+                                </select>
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label">Основной цвет</label>
+                                <select class="form-select">
+                                    <option value="orange" selected>Оранжевый</option>
+                                    <option value="blue">Синий</option>
+                                    <option value="green">Зеленый</option>
+                                    <option value="purple">Фиолетовый</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <div class="setting-header">
+                                <i class="fas fa-bell"></i>
+                                <h3>Уведомления</h3>
+                            </div>
+                            <div class="setting-description">
+                                Управление системными уведомлениями и алертами
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label" for="emailNotifications">
+                                    <span>Email уведомления</span>
+                                    <label class="toggle-switch" style="float: right;">
+                                        <input type="checkbox" id="emailNotifications" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </label>
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label" for="pushNotifications">
+                                    <span>Push уведомления</span>
+                                    <label class="toggle-switch" style="float: right;">
+                                        <input type="checkbox" id="pushNotifications" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </label>
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label" for="smsAlerts">
+                                    <span>SMS оповещения</span>
+                                    <label class="toggle-switch" style="float: right;">
+                                        <input type="checkbox" id="smsAlerts">
+                                        <span class="slider"></span>
+                                    </label>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <div class="setting-header">
+                                <i class="fas fa-shield-alt"></i>
+                                <h3>Безопасность</h3>
+                            </div>
+                            <div class="setting-description">
+                                Параметры безопасности и аутентификации
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label" for="twoFactor">
+                                    <span>Двухфакторная аутентификация</span>
+                                    <label class="toggle-switch" style="float: right;">
+                                        <input type="checkbox" id="twoFactor" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </label>
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label">Время сессии</label>
+                                <select class="form-select">
+                                    <option value="30">30 минут</option>
+                                    <option value="60" selected>1 час</option>
+                                    <option value="240">4 часа</option>
+                                    <option value="480">8 часов</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <div class="setting-header">
+                                <i class="fas fa-globe"></i>
+                                <h3>Локализация</h3>
+                            </div>
+                            <div class="setting-description">
+                                Языковые и региональные настройки
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label">Язык интерфейса</label>
+                                <select class="form-select">
+                                    <option value="ru" selected>Русский</option>
+                                    <option value="en">English</option>
+                                    <option value="de">Deutsch</option>
+                                </select>
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label">Временная зона</label>
+                                <select class="form-select">
+                                    <option value="msk" selected>Москва (UTC+3)</option>
+                                    <option value="spb">Санкт-Петербург (UTC+3)</option>
+                                    <option value="nsk">Новосибирск (UTC+7)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <div class="setting-header">
+                                <i class="fas fa-database"></i>
+                                <h3>Резервное копирование</h3>
+                            </div>
+                            <div class="setting-description">
+                                Настройка автоматического создания резервных копий
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label" for="autoBackup">
+                                    <span>Автоматическое резервирование</span>
+                                    <label class="toggle-switch" style="float: right;">
+                                        <input type="checkbox" id="autoBackup" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </label>
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label">Частота резервирования</label>
+                                <select class="form-select">
+                                    <option value="daily" selected>Ежедневно</option>
+                                    <option value="weekly">Еженедельно</option>
+                                    <option value="monthly">Ежемесячно</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <div class="setting-header">
+                                <i class="fas fa-chart-line"></i>
+                                <h3>Мониторинг производительности</h3>
+                            </div>
+                            <div class="setting-description">
+                                Настройки мониторинга системы и аналитики
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label" for="perfMonitoring">
+                                    <span>Мониторинг производительности</span>
+                                    <label class="toggle-switch" style="float: right;">
+                                        <input type="checkbox" id="perfMonitoring" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </label>
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label" for="errorTracking">
+                                    <span>Отслеживание ошибок</span>
+                                    <label class="toggle-switch" style="float: right;">
+                                        <input type="checkbox" id="errorTracking" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-save"></i>
+                                Сохранение настроек
+                            </h2>
+                        </div>
+                        <div class="section-body" style="text-align: center;">
+                            <button class="action-btn" onclick="saveSettings()">
+                                <i class="fas fa-save"></i> Сохранить все настройки
+                            </button>
+                            <button class="action-btn secondary" onclick="resetSettings()" style="margin-left: 16px;">
+                                <i class="fas fa-undo"></i> Сбросить к умолчанию
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="auth-modal" id="authModal">
+        <div class="auth-form">
+            <button class="close-modal" onclick="closeAuthModal()">×</button>
+            <h2>Вход в PayGo Enterprise</h2>
+            
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="form-group">
+                    <label for="phone">Номер телефона</label>
+                    <input type="tel" id="phone" class="form-input" placeholder="+7 (___) ___-__-__" required>
+                </div>
+                
+                <div class="form-group" id="codeGroup" style="display: none;">
+                    <label for="code">Код подтверждения</label>
+                    <input type="text" id="code" class="form-input" placeholder="Введите любой код (например: 1234)">
+                    <small style="color: var(--text-muted); font-size: 12px;">Это демо-версия. Введите любые 4+ цифры</small>
+                </div>
+                
+                <button type="submit" class="auth-submit" id="authSubmit">
+                    Получить код
+                </button>
+            </form>
+            
+            <div style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 14px;">
+                Продолжая, вы соглашаетесь с условиями использования PayGo Enterprise
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <div id="notificationText"></div>
+    </div>
+
+    <script>
+        let authStep = 'phone';
+        let userPhone = '';
+        let currentPage = 'overview';
+        let currentTheme = 'dark';
+        
+        // Security variables
+        let loginAttempts = 0;
+        let maxLoginAttempts = 5;
+        let rateLimitCount = 0;
+        let maxRateLimit = 50;
+        let sessionTimeout = 3600000; // 1 hour
+        let sessionTimer;
+        let securityLog = [];
+        let csrfToken = generateCSRFToken();
+
+        // Phone formatting
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0 && value[0] !== '7') {
+                value = '7' + value;
+            }
+            if (value.length > 11) {
+                value = value.slice(0, 11);
+            }
+            
+            let formatted = '';
+            if (value.length > 0) {
+                formatted = '+7';
+                if (value.length > 1) {
+                    formatted += ' (' + value.slice(1, 4);
+                }
+                if (value.length > 4) {
+                    formatted += ') ' + value.slice(4, 7);
+                }
+                if (value.length > 7) {
+                    formatted += '-' + value.slice(7, 9);
+                }
+                if (value.length > 9) {
+                    formatted += '-' + value.slice(9, 11);
+                }
+            }
+            
+            e.target.value = formatted;
+        });
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notification.className = `notification ${type}`;
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (currentTheme === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                themeIcon.className = 'fas fa-sun';
+                currentTheme = 'light';
+                showNotification('✨ Переключено на светлую тему', 'info');
+            } else {
+                body.removeAttribute('data-theme');
+                themeIcon.className = 'fas fa-moon';
+                currentTheme = 'dark';
+                showNotification('🌙 Переключено на темную тему', 'info');
+            }
+            
+            localStorage.setItem('theme', currentTheme);
+        }
+
+        function changeTheme(value) {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (value === 'light') {
+                body.setAttribute('data-theme', 'light');
+                themeIcon.className = 'fas fa-sun';
+                currentTheme = 'light';
+            } else {
+                body.removeAttribute('data-theme');
+                themeIcon.className = 'fas fa-moon';
+                currentTheme = 'dark';
+            }
+            
+            localStorage.setItem('theme', currentTheme);
+            showNotification(`Тема изменена на ${value === 'light' ? 'светлую' : 'темную'}`, 'success');
+        }
+
+        function openAuthModal() {
+            document.getElementById('authModal').classList.add('active');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.remove('active');
+            authStep = 'phone';
+            document.getElementById('phone').value = '';
+            document.getElementById('code').value = '';
+            document.getElementById('codeGroup').style.display = 'none';
+            document.getElementById('authSubmit').textContent = 'Получить код';
+        }
+
+        function handleAuth(event) {
+            event.preventDefault();
+            
+            // Security: Rate limiting check
+            if (!checkRateLimit()) {
+                return;
+            }
+            
+            if (authStep === 'phone') {
+                const phone = document.getElementById('phone').value;
+                
+                // Security: Input validation and sanitization
+                if (!validatePhoneNumber(phone)) {
+                    loginAttempts++;
+                    logSecurityEvent('Invalid phone format attempt', 'warning');
+                    showNotification('Введите корректный номер телефона', 'error');
+                    
+                    if (loginAttempts >= maxLoginAttempts) {
+                        showRateLimitWarning();
+                        return;
+                    }
+                    return;
+                }
+                
+                userPhone = sanitizeInput(phone);
+                authStep = 'code';
+                document.getElementById('codeGroup').style.display = 'block';
+                document.getElementById('authSubmit').textContent = 'Войти в систему';
+                
+                logSecurityEvent('Phone verification initiated', 'info');
+                showNotification('Это демо-версия. Введите любой код из 4+ цифр', 'info');
+                
+            } else if (authStep === 'code') {
+                const code = document.getElementById('code').value;
+                
+                // Security: Code validation
+                if (!validateVerificationCode(code)) {
+                    loginAttempts++;
+                    logSecurityEvent('Invalid verification code attempt', 'warning');
+                    showNotification('Введите код подтверждения (любые 4+ цифры)', 'error');
+                    
+                    if (loginAttempts >= maxLoginAttempts) {
+                        showRateLimitWarning();
+                        return;
+                    }
+                    return;
+                }
+                
+                login();
+            }
+        }
+
+        function login() {
+            // Security: Reset login attempts on successful login
+            loginAttempts = 0;
+            
+            // Security: Log successful authentication
+            logSecurityEvent('Successful authentication', 'success');
+            
+            // Security: Generate new CSRF token
+            csrfToken = generateCSRFToken();
+            
+            document.getElementById('landing').style.display = 'none';
+            document.getElementById('authModal').classList.remove('active');
+            document.getElementById('dashboard').classList.add('active');
+            
+            document.getElementById('userName').textContent = 'Администратор';
+            document.getElementById('userPhone').textContent = userPhone;
+            document.getElementById('userAvatar').textContent = userPhone.charAt(3);
+            
+            // Security: Start session timeout
+            startSessionTimeout();
+            
+            showNotification('🎉 Добро пожаловать в PayGo Enterprise!', 'success');
+            startLiveUpdates();
+        }
+
+        function logout() {
+            document.getElementById('landing').style.display = 'block';
+            document.getElementById('dashboard').classList.remove('active');
+            
+            authStep = 'phone';
+            userPhone = '';
+            
+            showNotification('👋 Вы вышли из системы', 'info');
+            stopLiveUpdates();
+        }
+
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId + '-page').classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+            
+            currentPage = pageId;
+            
+            // Show notification for page switch
+            const pageNames = {
+                'overview': 'Обзор',
+                'terminals': 'Терминалы',
+                'transactions': 'Транзакции',
+                'analytics': 'Аналитика',
+                'payments': 'Платежи',
+                'taxes': 'Налоговая отчетность',
+                'biometrics': 'Биометрия',
+                'settings': 'Настройки'
+            };
+            
+            showNotification(`📊 Открыт раздел: ${pageNames[pageId]}`, 'info');
+        }
+
+        let updateInterval;
+
+        function startLiveUpdates() {
+            updateInterval = setInterval(() => {
+                const currentCount = parseInt(document.getElementById('transactionCount').textContent.replace(/,/g, ''));
+                document.getElementById('transactionCount').textContent = (currentCount + Math.floor(Math.random() * 15)).toLocaleString();
+                
+                const revenue = parseFloat(document.getElementById('revenue').textContent.replace(/₽|М/g, ''));
+                document.getElementById('revenue').textContent = `₽${(revenue + 0.05).toFixed(1)}М`;
+            }, 5000);
+        }
+
+        function stopLiveUpdates() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        }
+
+        function addTerminal() {
+            showNotification('⚙️ Подключение нового терминала к системе PayGo Enterprise', 'success');
+        }
+
+        function manageTerminal(id) {
+            showNotification(`🔧 Управление терминалом ${id}: Настройки, мониторинг, удаленная диагностика`, 'info');
+        }
+
+        function exportTransactions() {
+            showNotification('📊 Экспорт данных: Файл Excel с транзакциями будет сформирован и отправлен на email', 'success');
+        }
+
+        function setupBiometric(type) {
+            const types = {
+                'fingerprint': 'отпечатков пальцев',
+                'face': 'распознавания лиц',
+                'iris': 'сканирования радужки',
+                'voice': 'голосовой аутентификации'
+            };
+            showNotification(`🔒 Настройка системы ${types[type]}`, 'info');
+        }
+
+        function exportBiometricLogs() {
+            showNotification('📋 Экспорт журнала биометрических аутентификаций', 'success');
+        }
+
+        function saveSettings() {
+            showNotification('💾 Все настройки успешно сохранены!', 'success');
+        }
+
+        function resetSettings() {
+            showNotification('🔄 Настройки сброшены к значениям по умолчанию', 'warning');
+        }
+
+        // Security Functions
+        function generateCSRFToken() {
+            return 'csrf_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36);
+        }
+        
+        function validatePhoneNumber(phone) {
+            const phoneRegex = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/;
+            return phoneRegex.test(phone) && phone.length === 18;
+        }
+        
+        function validateVerificationCode(code) {
+            return /^\d{4,}$/.test(code) && code.length >= 4 && code.length <= 8;
+        }
+        
+        function sanitizeInput(input) {
+            return input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                      .replace(/[<>&"']/g, function(m) {
+                          return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[m];
+                      });
+        }
+        
+        function checkRateLimit() {
+            rateLimitCount++;
+            if (rateLimitCount > maxRateLimit) {
+                showRateLimitWarning();
+                return false;
+            }
+            return true;
+        }
+        
+        function logSecurityEvent(event, level) {
+            const timestamp = new Date().toLocaleString('ru-RU');
+            securityLog.push({
+                timestamp,
+                event,
+                level,
+                ip: '127.0.0.1', // Simulated
+                userAgent: navigator.userAgent.substring(0, 50) + '...'
+            });
+            
+            // Update audit time in security panel
+            document.getElementById('auditTime').textContent = timestamp;
+            
+            if (securityLog.length > 100) {
+                securityLog.shift(); // Keep only last 100 events
+            }
+        }
+        
+        function startSessionTimeout() {
+            clearTimeout(sessionTimer);
+            sessionTimer = setTimeout(() => {
+                showNotification('⏰ Сессия истекла по соображениям безопасности', 'warning');
+                setTimeout(logout, 3000);
+            }, sessionTimeout);
+        }
+        
+        function showRateLimitWarning() {
+            const warning = document.getElementById('rateLimitWarning');
+            warning.classList.add('show');
+            
+            let countdown = 30;
+            const timer = setInterval(() => {
+                document.getElementById('cooldownTimer').textContent = countdown;
+                countdown--;
+                if (countdown < 0) {
+                    clearInterval(timer);
+                    warning.classList.remove('show');
+                    rateLimitCount = 0;
+                    loginAttempts = 0;
+                }
+            }, 1000);
+            
+            logSecurityEvent('Rate limit triggered', 'error');
+        }
+        
+        function toggleSecurityPanel() {
+            const panel = document.getElementById('securityPanel');
+            panel.classList.toggle('show');
+        }
+        
+        // Security: Hide security panel when clicking outside
+        document.addEventListener('click', function(event) {
+            const panel = document.getElementById('securityPanel');
+            const badge = document.querySelector('.security-badge');
+            
+            if (!panel.contains(event.target) && !badge.contains(event.target)) {
+                panel.classList.remove('show');
+            }
+        });
+        
+        // Security: Prevent right-click context menu on sensitive elements
+        document.addEventListener('contextmenu', function(event) {
+            if (event.target.closest('.auth-form') || event.target.closest('.security-panel')) {
+                event.preventDefault();
+            }
+        });
+        
+        // Security: Prevent copy on sensitive inputs
+        document.addEventListener('copy', function(event) {
+            if (event.target.type === 'password' || event.target.id === 'code') {
+                event.preventDefault();
+                showNotification('Копирование заблокировано по соображениям безопасности', 'warning');
+            }
+        });
+        
+        // Security: Clear clipboard after logout
+        function clearSensitiveData() {
+            userPhone = '';
+            csrfToken = '';
+            securityLog = [];
+            
+            // Clear form data
+            document.getElementById('phone').value = '';
+            document.getElementById('code').value = '';
+            
+            // Clear session storage
+            sessionStorage.clear();
+        }
+
+        // Initialize theme and security
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                currentTheme = savedTheme;
+                const body = document.body;
+                const themeIcon = document.getElementById('themeIcon');
+                
+                if (currentTheme === 'light') {
+                    body.setAttribute('data-theme', 'light');
+                    themeIcon.className = 'fas fa-sun';
+                }
+            }
+            
+            // Security: Log system initialization
+            logSecurityEvent('System initialized', 'info');
+            
+            // Security: Check HTTPS (simulated)
+            if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+                showNotification('⚠️ Подключение не защищено. Используйте HTTPS', 'warning');
+            }
+            
+            console.log('PayGo Enterprise система инициализирована');
+            showNotification('🚀 PayGo Enterprise готов к работе!', 'success');
+        });
+    </script>
+</body>
+</html> 
