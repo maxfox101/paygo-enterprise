@@ -1,0 +1,264 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Currency Card */
+.currency-card {
+  max-width: 400px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: white;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.currency-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.currency-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.currency-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.currency-symbol {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.currency-name {
+  color: #64748b;
+}
+
+.currency-rate {
+  text-align: right;
+}
+
+.rate-value {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.rate-change {
+  font-size: 12px;
+}
+
+.rate-change.positive {
+  color: #10b981;
+}
+
+.rate-change.negative {
+  color: #ef4444;
+}
+
+/* Quick Actions */
+.quick-actions {
+  margin-bottom: 32px;
+}
+
+.action-card {
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  background: white;
+}
+
+.action-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin: 0 auto 12px;
+  color: white;
+}
+
+.action-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 4px;
+}
+
+.action-desc {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Plan Table */
+.plan-table {
+  overflow: hidden;
+}
+
+.table-header {
+  background: #f8fafc;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  margin: -24px -24px 24px -24px;
+}
+
+.table-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #475569;
+  font-size: 14px;
+}
+
+td {
+  color: #64748b;
+}
+
+.status-completed {
+  color: #059669;
+  font-weight: 500;
+}
+
+.status-current {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.status-planned {
+  color: #7c3aed;
+  font-weight: 500;
+}
+
+/* Sections */
+.functionality-section,
+.tech-section {
+  margin-top: 32px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 24px;
+}
+
+.subsection {
+  margin-bottom: 32px;
+}
+
+.subsection-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 16px;
+}
+
+/* Feature Cards */
+.feature-cards,
+.tech-cards {
+  gap: 16px;
+}
+
+.feature-card,
+.tech-card {
+  padding: 20px;
+}
+
+.feature-card h4,
+.tech-card h4 {
+  color: #1a202c;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.feature-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.feature-card li {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 4px;
+  position: relative;
+  padding-left: 16px;
+}
+
+.feature-card li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #ff6b35;
+  font-weight: bold;
+}
+
+.tech-card p {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .currency-card {
+    max-width: none;
+  }
+  
+  .table-container {
+    font-size: 14px;
+  }
+  
+  th, td {
+    padding: 12px 8px;
+  }
+} 

@@ -1,0 +1,255 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: paygo_database
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: paygo_db
+      POSTGRES_USER: paygo_user
+      POSTGRES_PASSWORD: paygo_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=ru_RU.UTF-8 --lc-ctype=ru_RU.UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./web-service/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - paygo_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paygo_user -d paygo_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: paygo_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - paygo_network
+    command: redis-server --appendonly yes --requirepass paygo_redis_password
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./web-service/backend
+      dockerfile: Dockerfile
+    container_name: paygo_backend
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://paygo_user:paygo_password@database:5432/paygo_db
+      - REDIS_URL=redis://:paygo_redis_password@redis:6379
+      - SECRET_KEY=your-super-secret-key-change-in-production
+      - DEBUG=False
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+    ports:
+      - "8000:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./web-service/backend:/app
+      - backend_uploads:/app/uploads
+    networks:
+      - paygo_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend (Nginx)
+  frontend:
+    build:
+      context: ./web-service/frontend
+      dockerfile: Dockerfile
+    container_name: paygo_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    volumes:
+      - ./web-service/frontend:/usr/share/nginx/html:ro
+    networks:
+      - paygo_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: paygo_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - paygo_network
+
+  # Prometheus for monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: paygo_prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - paygo_network
+
+  # Grafana for dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: paygo_grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=paygo_admin_password
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - paygo_network
+
+  # Celery Worker for background tasks
+  celery_worker:
+    build:
+      context: ./web-service/backend
+      dockerfile: Dockerfile
+    container_name: paygo_celery_worker
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://paygo_user:paygo_password@database:5432/paygo_db
+      - REDIS_URL=redis://:paygo_redis_password@redis:6379
+      - SECRET_KEY=your-super-secret-key-change-in-production
+    command: celery -A main.celery worker --loglevel=info
+    depends_on:
+      - database
+      - redis
+    volumes:
+      - ./web-service/backend:/app
+    networks:
+      - paygo_network
+
+  # Celery Beat for scheduled tasks
+  celery_beat:
+    build:
+      context: ./web-service/backend
+      dockerfile: Dockerfile
+    container_name: paygo_celery_beat
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://paygo_user:paygo_password@database:5432/paygo_db
+      - REDIS_URL=redis://:paygo_redis_password@redis:6379
+      - SECRET_KEY=your-super-secret-key-change-in-production
+    command: celery -A main.celery beat --loglevel=info
+    depends_on:
+      - database
+      - redis
+    volumes:
+      - ./web-service/backend:/app
+    networks:
+      - paygo_network
+
+  # Flower for Celery monitoring
+  flower:
+    build:
+      context: ./web-service/backend
+      dockerfile: Dockerfile
+    container_name: paygo_flower
+    restart: unless-stopped
+    ports:
+      - "5555:5555"
+    environment:
+      - REDIS_URL=redis://:paygo_redis_password@redis:6379
+    command: celery -A main.celery flower --port=5555
+    depends_on:
+      - redis
+    networks:
+      - paygo_network
+
+  # Backup service
+  backup:
+    image: postgres:15-alpine
+    container_name: paygo_backup
+    restart: "no"
+    environment:
+      - PGPASSWORD=paygo_password
+    volumes:
+      - ./backups:/backups
+      - backup_scripts:/scripts
+    depends_on:
+      - database
+    networks:
+      - paygo_network
+    command: >
+      sh -c "
+      while true; do
+        pg_dump -h database -U paygo_user -d paygo_db > /backups/backup_$(date +%Y%m%d_%H%M%S).sql
+        find /backups -name '*.sql' -mtime +7 -delete
+        sleep 86400
+      done
+      "
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  nginx_logs:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  backup_scripts:
+    driver: local
+
+networks:
+  paygo_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 

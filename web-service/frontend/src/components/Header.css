@@ -1,0 +1,56 @@
+.header {
+  background: white;
+  padding: 20px 24px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.greeting {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.balance {
+  text-align: right;
+}
+
+.balance-amount {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ff6b35;
+  line-height: 1;
+}
+
+.balance-label {
+  color: #64748b;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .balance-amount {
+    font-size: 24px;
+  }
+} 
